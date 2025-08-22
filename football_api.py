@@ -1,8 +1,9 @@
 "FootBall API"
 
-import pickle
 import http.client
 import json
+import pickle
+
 import constants
 
 
@@ -127,7 +128,7 @@ def parse_scores(scored, conceded):
 
     Returns
     -------
-        "Win", "Tie", "Draw"
+        "Win", "Draw", "Lost"
     """
     if scored > conceded:
         return "Win"

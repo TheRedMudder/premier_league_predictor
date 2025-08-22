@@ -1,14 +1,14 @@
 "structure soccer data"
 
-import pickle
-
 import pandas as pd
 
-from football_api import filter_games, get_all_games, get_game_ids, parse_scores
+from football_api import (filter_games, get_all_games, get_game_ids,
+                          parse_scores)
 
 # options for generating team report
 USE_API = False
 SELECTED_TEAM = "Liverpool"
+YEARS = [2021, 2022, 2023]
 
 
 def generate_game_summary(team_games, ids, team_name):
@@ -143,7 +143,15 @@ def generate_team_report(season_games, team_name):
 
 
 if __name__ == "__main__":
-    # get all Premier League games (from API or disk)
-    games = get_all_games(use_api=USE_API)
-    team_report_df = generate_team_report(season_games=games, team_name=SELECTED_TEAM)
-    print(team_report_df)
+    # loop through all seasons
+    seasons = []
+    for year in YEARS:
+        # get all Premier League games (from API or disk)
+        games = get_all_games(year=year, use_api=USE_API)
+        # generate team report
+        seasons.append(
+            generate_team_report(season_games=games, team_name=SELECTED_TEAM)
+        )
+    # merge all seasons
+    merged_df = pd.concat(seasons)
+    print(merged_df)
