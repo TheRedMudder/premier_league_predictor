@@ -1,11 +1,12 @@
 "FootBall API"
 
+import pickle
 import http.client
 import json
 import constants
 
 
-def get_all_games(league_id=39, year=2023):
+def get_all_games(league_id=39, year=2023, use_api=True):
     """get all games
 
     Parameters
@@ -19,11 +20,54 @@ def get_all_games(league_id=39, year=2023):
     -------
         all games
     """
-    conn = http.client.HTTPSConnection("v3.football.api-sports.io")
-    headers = constants.HEADERS
-    conn.request("GET", f"/fixtures?league={league_id}&season={year}", headers=headers)
-    data = conn.getresponse().read()
-    return json.loads(data.decode("utf-8"))["response"]
+    cache_name = f"all_games_league_{league_id}_season_{year}.pickle"
+    if use_api:
+        # get all games
+        conn = http.client.HTTPSConnection("v3.football.api-sports.io")
+        headers = constants.HEADERS
+        conn.request(
+            "GET", f"/fixtures?league={league_id}&season={year}", headers=headers
+        )
+        data = conn.getresponse().read()
+        res = json.loads(data.decode("utf-8"))["response"]
+        save_cache(file_name=cache_name, data=res)
+        return res
+    return read_cache(cache_name)
+
+
+def save_cache(file_name, data):
+    """cache data
+
+    Parameters
+    ----------
+    file_name
+        cache file name
+    data
+        cache data
+    """
+    # cache data
+    with open(file_name, "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # validate cache
+    with open(file_name, "rb") as handle:
+        cache_games = pickle.load(handle)
+    assert data == cache_games, "Cache failed"
+
+
+def read_cache(file_name):
+    """read cache
+
+    Parameters
+    ----------
+    file_name
+        cache file name
+
+    Returns
+    -------
+        cached data
+    """
+    with open(file_name, "rb") as handle:
+        return pickle.load(handle)
 
 
 def filter_games(games, team_name=None, game_id=None):
@@ -83,7 +127,7 @@ def parse_scores(scored, conceded):
 
     Returns
     -------
-        "Win", "Tie", "Lost"
+        "Win", "Tie", "Draw"
     """
     if scored > conceded:
         return "Win"

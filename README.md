@@ -1,8 +1,6 @@
 # Quick Start
-1. Add API KEY
-Replace `KEY` in `constant.py` with your API Key
-2. Enable API 
-Set `USE_API` to `True` in `football_api.py`
+1. Add API KEY: Replace `KEY` in `constant.py` with your API Key
+2. Enable API: Set `USE_API` to `True` in `football_api.py`
 3. Run `python structure_data.py`
 4. Disable API
 Set `USE_API` to `False` in `football_api.py`

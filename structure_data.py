@@ -1,4 +1,4 @@
-"structure Liverpool data"
+"structure soccer data"
 
 import pickle
 
@@ -6,26 +6,40 @@ import pandas as pd
 
 from football_api import filter_games, get_all_games, get_game_ids, parse_scores
 
-# Options for generating team report
+# options for generating team report
 USE_API = False
 SELECTED_TEAM = "Liverpool"
 
 
 def generate_game_summary(team_games, ids, team_name):
-    """Generates game summary"""
-    # Loop through games
+    """generates game summary
+
+    Parameters
+    ----------
+    team_games
+        all team games
+    ids
+        game ids
+    team_name
+        team name
+
+    Returns
+    -------
+        dataframe: home team, scores, result (win/loss/draw), opponent team
+    """
     game_summary = {}
-    for g_id in ids:
-        game = filter_games(team_games, game_id=g_id)[0]
-        # Home Team, Scores, winner
+    # loop through games
+    for game_id in ids:
+        game = filter_games(team_games, game_id=game_id)[0]
+        # home team, scores, result (win/loss/draw)
         is_home = game["teams"]["home"]["name"] == team_name
         scored = game["goals"]["home" if is_home else "away"]
         conceded = game["goals"]["away" if is_home else "home"]
         winner = parse_scores(scored=scored, conceded=conceded)
-        # Opponent Team Name
+        # opponent team name
         opponent = game["teams"]["away" if is_home else "home"]["name"]
-        # Game Results
-        game_summary[str(g_id)] = {
+        # game results
+        game_summary[str(game_id)] = {
             "is_home": is_home,
             "scored": scored,
             "conceded": conceded,
@@ -35,8 +49,22 @@ def generate_game_summary(team_games, ids, team_name):
     return game_summary
 
 
-def generate_prior_game_summary(game_results, game_index, game_ids):
-    """get prior five game summary"""
+def generate_five_game_summary(game_results, ids, index):
+    """generates prior five game summary
+
+    Parameters
+    ----------
+    game_results
+        game results, dataframe: home team, scores, result (win/loss/draw), opponent team
+    ids
+        game ids
+    index
+        game index
+
+    Returns
+    -------
+        score, loss, outcome
+    """
     # Total Score.
     score = 0
     # Total Loss
@@ -45,7 +73,7 @@ def generate_prior_game_summary(game_results, game_index, game_ids):
     outcome = []
     # Get prior 5 games
     for j in range(1, 6):
-        game_prior = game_results[str(game_ids[game_index - j])]
+        game_prior = game_results[str(ids[index - j])]
         score += game_prior["scored"]
         loss += game_prior["conceded"]
         outcome.append(game_prior["result"][0])
@@ -53,85 +81,69 @@ def generate_prior_game_summary(game_results, game_index, game_ids):
     return score, loss, outcome
 
 
-def generate_team_report(season_games):
-    """Generate Team Report
+def generate_team_report(season_games, team_name):
+    """generate team report
 
     Parameters
     ----------
     season_games
-        All games in season
+        all games in season
 
     Returns
     -------
-        Dataframe
+        dataframe
     """
     # filter team games
-    team_games = filter_games(games=season_games, team_name=SELECTED_TEAM)
-    # get game id in descending order
+    team_games = filter_games(games=season_games, team_name=team_name)
+    # get game ids in descending order
     game_ids = get_game_ids(team_games)
-    # Generates game summaries:  Home Team, Scores, Game results, Opponent name
+    # generates game summaries:  home team, scores, game results, opponent name
     game_results = generate_game_summary(
-        team_games=team_games, ids=game_ids, team_name=SELECTED_TEAM
+        team_games=team_games, ids=game_ids, team_name=team_name
     )
-    # Loop through games. Start at 5.
+    # loop through games. start at 5.
     for i in range(5, len(game_ids)):
-        current_game_id = game_ids[i]
-        game = game_results[str(current_game_id)]
-        # Get Prior 5 games: Total Score, Total Loss, Win/Loss/Draw
+        this_game_id = game_ids[i]
+        game = game_results[str(this_game_id)]
+        # get prior 5 games: Total Score, Total Loss, Win/Loss/Draw
         game["total_score"], game["total_conceded"], game["momentum"] = (
-            generate_prior_game_summary(
-                game_results=game_results, game_index=i, game_ids=game_ids
-            )
+            generate_five_game_summary(game_results=game_results, ids=game_ids, index=i)
         )
 
-        # Loop through opponent games
-
-        # Get Opponent Games in Descending Order
+        # opponent
+        # get opponent games in descending order
         opponent_name = game["opponent_name"]
         opponent_games = filter_games(games=season_games, team_name=opponent_name)
-        # Get Which Index This Game is For Opponent
+        # get which index this game is for opponent
         opponent_game_ids = get_game_ids(opponent_games)
-        opponent_game_index = opponent_game_ids.index(current_game_id)
+        opponent_game_index = opponent_game_ids.index(this_game_id)
 
-        # Check if index for opponent is greater than 4 (6th games or higher)
+        # check if index for opponent is greater than 4 (6th game or higher)
         if opponent_game_index > 4:
-            # Generates opponent game summaries:  Home Team, Scores, Game results, Opponent name
+            # generates opponent game summaries:  home team, scores, game results
             opponent_game_results = generate_game_summary(
                 team_games=opponent_games,
                 ids=opponent_game_ids,
                 team_name=opponent_name,
             )
-            # Get Opponent Previous 5 Games Total Win
-            total_opponent_score, total_opponent_loss, momentum_opponent = (
-                generate_prior_game_summary(
-                    game_results=opponent_game_results,
-                    game_index=opponent_game_index,
-                    game_ids=opponent_game_ids,
-                )
+            # get opponent prior 5 games summary
+            (
+                game["total_opponent_score"],
+                game["total_opponent_conceded"],
+                game["momentum_opponent"],
+            ) = generate_five_game_summary(
+                game_results=opponent_game_results,
+                ids=opponent_game_ids,
+                index=opponent_game_index,
             )
-            game["total_opponent_score"] = total_opponent_score
-            game["total_opponent_conceded"] = total_opponent_loss
-            game["momentum_opponent"] = momentum_opponent
-    # Create DataFrame
+    # create df
     return pd.DataFrame(
         list(game_results.values())[5:], index=list(game_results.keys())[5:]
     )
 
 
 if __name__ == "__main__":
-    # # get all Premier League games (from API or disk)
-    if USE_API:
-        games = get_all_games()
-        # cache all games
-        with open("all_games.pickle", "wb") as handle:
-            pickle.dump(games, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        # validate cache
-        with open("all_games.pickle", "rb") as handle:
-            cache_games = pickle.load(handle)
-        assert games == cache_games, "Cache failed"
-    else:
-        # Read cached responses
-        with open("all_games.pickle", "rb") as handle:
-            games = pickle.load(handle)
-    team_report_df = generate_team_report(season_games=games)
+    # get all Premier League games (from API or disk)
+    games = get_all_games(use_api=USE_API)
+    team_report_df = generate_team_report(season_games=games, team_name=SELECTED_TEAM)
     print(team_report_df)
