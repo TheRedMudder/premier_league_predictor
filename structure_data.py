@@ -2,8 +2,7 @@
 
 import pandas as pd
 
-from football_api import (filter_games, get_all_games, get_game_ids,
-                          parse_scores)
+from football_api import filter_games, get_all_games, get_game_ids, parse_scores
 
 # options for generating team report
 USE_API = False
@@ -88,14 +87,17 @@ def generate_team_report(season_games, team_name):
     ----------
     season_games
         all games in season
+    team_name
+        team name
 
     Returns
     -------
         dataframe
+
     """
     # filter team games
     team_games = filter_games(games=season_games, team_name=team_name)
-    # get game ids in descending order
+    # get game ids in ascending order of timestamp
     game_ids = get_game_ids(team_games)
     # generates game summaries:  home team, scores, game results, opponent name
     game_results = generate_game_summary(
@@ -111,7 +113,7 @@ def generate_team_report(season_games, team_name):
         )
 
         # opponent
-        # get opponent games in descending order
+        # get opponent games in ascending order
         opponent_name = game["opponent_name"]
         opponent_games = filter_games(games=season_games, team_name=opponent_name)
         # get which index this game is for opponent
