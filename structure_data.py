@@ -7,7 +7,23 @@ from football_api import filter_games, get_all_games, get_game_ids, parse_scores
 # options for generating team report
 USE_API = False
 SELECTED_TEAM = "Liverpool"
-YEARS = [2021, 2022, 2023]
+YEARS = [
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+]
 
 
 def generate_game_summary(team_games, ids, team_name):
@@ -144,16 +160,30 @@ def generate_team_report(season_games, team_name):
     )
 
 
-if __name__ == "__main__":
+def generate_historic_team_report(team_name, years, use_api=False):
+    """generate team report accross seasons
+
+    Parameters
+    ----------
+    team_name
+        team name
+    years
+        years
+    """
     # loop through all seasons
     seasons = []
-    for year in YEARS:
+    for year in years:
         # get all Premier League games (from API or disk)
-        games = get_all_games(year=year, use_api=USE_API)
+        games = get_all_games(year=year, use_api=use_api)
         # generate team report
-        seasons.append(
-            generate_team_report(season_games=games, team_name=SELECTED_TEAM)
-        )
+        seasons.append(generate_team_report(season_games=games, team_name=team_name))
     # merge all seasons
-    merged_df = pd.concat(seasons)
-    print(merged_df)
+    return pd.concat(seasons)
+
+
+if __name__ == "__main__":
+    # get all Premier League games for selected team
+    all_team_games = generate_historic_team_report(
+        team_name=SELECTED_TEAM, years=YEARS, use_api=USE_API
+    )
+    print(all_team_games)
