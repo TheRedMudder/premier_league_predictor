@@ -152,7 +152,7 @@ def get_game_ids(games):
     return [game["fixture"]["id"] for game in games]
 
 
-def parse_scores(scored, conceded):
+def parse_scores(scored, conceded, num=False):
     """Parse scores
 
     Parameters
@@ -167,7 +167,7 @@ def parse_scores(scored, conceded):
         "Win", "Draw", "Lost"
     """
     if scored > conceded:
-        return "Win"
+        return 1 if num else "Win"
     if scored == conceded:
-        return "Draw"
-    return "Lost"
+        return 0 if num else "Draw"
+    return -1 if num else "Lost"
