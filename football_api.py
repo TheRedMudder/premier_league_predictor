@@ -62,7 +62,11 @@ def get_fixture_statistics(fixture_id=1035037, use_api=True):
             "GET", f"/fixtures/statistics?fixture={fixture_id}", headers=headers
         )
         data = conn.getresponse().read()
-        res = json.loads(data.decode("utf-8"))["response"]
+        raw_res = json.loads(data.decode("utf-8"))
+        res, res_err = raw_res["response"], raw_res["errors"]
+        # assert if API fetch errors
+        assert len(res_err) == 0, res_err
+        # cache and return resp
         save_cache(file_name=cache_name, data=res)
         return res
     return read_cache(cache_name)

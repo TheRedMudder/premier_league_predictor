@@ -8,12 +8,6 @@ from football_api import filter_games, get_all_games, get_game_ids, parse_scores
 USE_API = False
 SELECTED_TEAM = "Liverpool"
 YEARS = [
-    2010,
-    2011,
-    2012,
-    2013,
-    2014,
-    2015,
     2016,
     2017,
     2018,
