@@ -80,8 +80,8 @@ def generate_five_game_summary(game_results, ids, index):
     loss = 0
     # Win/Loss/Draw
     outcome = []
-    # Get prior 5 games
-    for j in range(1, 6):
+    # Get prior 3 games
+    for j in range(1, 4):
         game_prior = game_results[str(ids[index - j])]
         score += game_prior["scored"]
         loss += game_prior["conceded"]
@@ -113,11 +113,11 @@ def generate_team_report(season_games, team_name):
     game_results = generate_game_summary(
         team_games=team_games, ids=game_ids, team_name=team_name
     )
-    # loop through games. start at 5.
-    for i in range(5, len(game_ids)):
+    # loop through games. start at 3.
+    for i in range(3, len(game_ids)):
         this_game_id = game_ids[i]
         game = game_results[str(this_game_id)]
-        # get prior 5 games: Total Score, Total Loss, Win/Loss/Draw
+        # get prior 3 games: Total Score, Total Loss, Win/Loss/Draw
         game["total_score"], game["total_conceded"], game["momentum"] = (
             generate_five_game_summary(game_results=game_results, ids=game_ids, index=i)
         )
@@ -130,15 +130,15 @@ def generate_team_report(season_games, team_name):
         opponent_game_ids = get_game_ids(opponent_games)
         opponent_game_index = opponent_game_ids.index(this_game_id)
 
-        # check if index for opponent is greater than 4 (6th game or higher)
-        if opponent_game_index > 4:
+        # check if index for opponent is greater than 2 (4th game or higher)
+        if opponent_game_index > 2:
             # generates opponent game summaries:  home team, scores, game results
             opponent_game_results = generate_game_summary(
                 team_games=opponent_games,
                 ids=opponent_game_ids,
                 team_name=opponent_name,
             )
-            # get opponent prior 5 games summary
+            # get opponent prior 3 games summary
             (
                 game["total_opponent_score"],
                 game["total_opponent_conceded"],
@@ -150,7 +150,7 @@ def generate_team_report(season_games, team_name):
             )
     # create df
     return pd.DataFrame(
-        list(game_results.values())[5:], index=list(game_results.keys())[5:]
+        list(game_results.values())[3:], index=list(game_results.keys())[3:]
     )
 
 

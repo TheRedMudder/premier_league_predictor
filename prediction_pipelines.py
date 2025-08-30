@@ -69,15 +69,17 @@ if __name__ == "__main__":
 
     # SELECTED_TEAM = "Sunderland"
 
-    # SELECTED_TEAM = "Leeds"
+    SELECTED_TEAM = "Leeds"
 
     # SELECTED_TEAM = "Brighton"
+
+    # SELECTED_TEAM = "Manchester City"
 
     # SELECTED_TEAM = "Nottingham Forest"
 
     # SELECTED_TEAM = "Liverpool"
-# 
-    SELECTED_TEAM = "Aston Villa"
+
+    # SELECTED_TEAM = "Aston Villa"
     
     YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
     # team_games = structure_data.generate_historic_team_report(
@@ -224,15 +226,20 @@ if __name__ == "__main__":
 
     # predict_future=(pd.DataFrame([{"total_score":5,"total_conceded":6,"total_opponent_score":7,"total_opponent_conceded":5}])) # Sunderland
 
-    # predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":8,"total_opponent_score":5,"total_opponent_conceded":8}])) # Leeds
+    predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":8,"total_opponent_score":5,"total_opponent_conceded":8}])) # Leeds
 
     # predict_future=(pd.DataFrame([{"total_score":13,"total_conceded":2,"total_opponent_score":15,"total_opponent_conceded":8}])) # Brighton
+
+
+    # predict_future=(pd.DataFrame([{"total_score":15,"total_conceded":8,"total_opponent_score":13,"total_opponent_conceded":2}])) # MU
 
     # predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":3,"total_opponent_score":6,"total_opponent_conceded":12}])) # Nottingham Fores
 
     # predict_future=(pd.DataFrame([{"total_score":14,"total_conceded":12,"total_opponent_score":11,"total_opponent_conceded":3}])) # Liverpool
 
-    predict_future=(pd.DataFrame([{"total_score":7,"total_conceded":4,"total_opponent_score":6,"total_opponent_conceded":5}])) # Aston Villa
+
+
+    # predict_future=(pd.DataFrame([{"total_score":7,"total_conceded":4,"total_opponent_score":6,"total_opponent_conceded":5}])) # Aston Villa
 
     print("\n\n\n\n\n\n")
     # print(results)
