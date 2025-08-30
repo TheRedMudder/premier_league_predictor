@@ -21,7 +21,7 @@ def get_all_games(league_id=39, year=2023, use_api=True):
     -------
         all games
     """
-    cache_name = f"all_games_league_{league_id}_season_{year}.pickle"
+    cache_name = f"data/all_games_league_{league_id}_season_{year}.pickle"
     if use_api:
         # get all games
         conn = http.client.HTTPSConnection("v3.football.api-sports.io")
@@ -53,7 +53,7 @@ def get_fixture_statistics(fixture_id=1035037, use_api=True):
     -------
         all games
     """
-    cache_name = f"fixture_statistics_{fixture_id}.pickle"
+    cache_name = f"data/fixture_statistics_{fixture_id}.pickle"
     if use_api:
         # get all games
         conn = http.client.HTTPSConnection("v3.football.api-sports.io")

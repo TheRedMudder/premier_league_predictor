@@ -59,8 +59,27 @@ def split_momemtum(d, cat):
 if __name__ == "__main__":
     # get all games for selected team
     # USE_API = False
-    SELECTED_TEAM = "Liverpool"
-    YEARS = [2021, 2022, 2023]
+    # SELECTED_TEAM = "Chelsea"
+
+    # SELECTED_TEAM = "Manchester United"
+
+    # SELECTED_TEAM = "Wolves"
+
+    # SELECTED_TEAM = "Tottenham"
+
+    # SELECTED_TEAM = "Sunderland"
+
+    # SELECTED_TEAM = "Leeds"
+
+    # SELECTED_TEAM = "Brighton"
+
+    # SELECTED_TEAM = "Nottingham Forest"
+
+    # SELECTED_TEAM = "Liverpool"
+# 
+    SELECTED_TEAM = "Aston Villa"
+    
+    YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
     # team_games = structure_data.generate_historic_team_report(
     #     team_name=SELECTED_TEAM, years=YEARS, use_api=USE_API
     # )
@@ -76,6 +95,12 @@ if __name__ == "__main__":
         )
     # merge all seasons
     df = pd.concat(seasons)
+
+    # Don't allow drops more than 5
+    initial_rows = df.shape[0]
+    df=df.dropna()
+    assert (initial_rows-df.shape[0])<5, "Dropping 5 or more rows"
+
     # decode prior game performance
 
     # select features for ML Pipelines
@@ -97,6 +122,10 @@ if __name__ == "__main__":
     # Split data
 
     # X
+    # print(df.shape)
+    # df.dropna(axis=1)
+    # print(df.shape)
+
     X = df.drop(
         [
             "scored",
@@ -149,7 +178,7 @@ if __name__ == "__main__":
     pipelines["gradient_boosting"] = Pipeline(
         steps=[("prep", pass_only), ("m", GradientBoostingClassifier())]
     )
-
+    best_predictor = (None,None)
     scores = []
     kFold = KFold(n_splits=10, shuffle=False)
     avg_k_fold = {}
@@ -184,9 +213,32 @@ if __name__ == "__main__":
 
     # For each value in dict calculate average
     print(pd.DataFrame(avg_k_fold).mean().sort_values())
-    print(X)
-    predict_future=(pd.DataFrame([{"total_score":14,"total_conceded":12,"total_opponent_score":12,"total_opponent_conceded":3}]))
+    best_predictor = (pd.DataFrame(avg_k_fold).mean().sort_values().index[-1], pd.DataFrame(avg_k_fold).mean().sort_values()[-1])
+    # print(X) 
+    # predict_future=(pd.DataFrame([{"total_score":14,"total_conceded":2,"total_opponent_score":9,"total_opponent_conceded":4}])) # Chelsea L
+    # predict_future=(pd.DataFrame([{"total_score":6,"total_conceded":7,"total_opponent_score":4,"total_opponent_conceded":6}])) # Manchester United
+
+    # predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":10,"total_opponent_score":6,"total_opponent_conceded":4}])) # Wolves
+
+    # predict_future=(pd.DataFrame([{"total_score":8,"total_conceded":7,"total_opponent_score":4,"total_opponent_conceded":7}])) # Tottenham
+
+    # predict_future=(pd.DataFrame([{"total_score":5,"total_conceded":6,"total_opponent_score":7,"total_opponent_conceded":5}])) # Sunderland
+
+    # predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":8,"total_opponent_score":5,"total_opponent_conceded":8}])) # Leeds
+
+    # predict_future=(pd.DataFrame([{"total_score":13,"total_conceded":2,"total_opponent_score":15,"total_opponent_conceded":8}])) # Brighton
+
+    # predict_future=(pd.DataFrame([{"total_score":4,"total_conceded":3,"total_opponent_score":6,"total_opponent_conceded":12}])) # Nottingham Fores
+
+    # predict_future=(pd.DataFrame([{"total_score":14,"total_conceded":12,"total_opponent_score":11,"total_opponent_conceded":3}])) # Liverpool
+
+    predict_future=(pd.DataFrame([{"total_score":7,"total_conceded":4,"total_opponent_score":6,"total_opponent_conceded":5}])) # Aston Villa
+
+    print("\n\n\n\n\n\n")
+    # print(results)
     for name, pipe in pipelines.items():
-            if name == "support_vector":
-                print(pipe.predict(predict_future))
-                print(le.inverse_transform(pipe.predict(predict_future)))
+        
+        if name == best_predictor[0]:
+            print(f"Using {best_predictor[0]} for {SELECTED_TEAM} with confidence: {best_predictor[1]}")
+            print(pipe.predict(predict_future))
+            print(le.inverse_transform(pipe.predict(predict_future)))
